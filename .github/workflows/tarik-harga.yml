@@ -1,0 +1,27 @@
+name: Tarik harga harian
+on:
+  schedule:
+    - cron: "0 2 * * 1-5"   # 09:00 WIB, penutupan hari bursa sebelumnya
+    - cron: "0 8 * * 1-5"   # 15:00 WIB, snapshot sebelum bursa tutup (belum final)
+    - cron: "0 10 * * 1-5"  # 17:00 WIB, penutupan hari ini (final)
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  tarik:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install yfinance pandas
+      - run: python fetch_prices.py
+      - run: python analyze.py
+      - name: Simpan perubahan
+        run: |
+          git config user.name "harga-bot"
+          git config user.email "harga-bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "Harga $(TZ=Asia/Jakarta date '+%Y-%m-%d %H:%M') WIB"
+          git push
