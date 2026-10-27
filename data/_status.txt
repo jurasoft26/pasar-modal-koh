@@ -1,0 +1,3 @@
+ditarik_wib=2026-10-27 15:24
+berhasil=38
+gagal=0
